@@ -1,4 +1,4 @@
-package pl.edu.pw.elka.wpam.hashtag
+package wpam.hashtag
 
 import org.junit.Test
 

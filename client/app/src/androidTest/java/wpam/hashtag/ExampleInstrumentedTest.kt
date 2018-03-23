@@ -1,4 +1,4 @@
-package pl.edu.pw.elka.wpam.hashtag
+package wpam.hashtag
 
 import android.support.test.InstrumentationRegistry
 import android.support.test.runner.AndroidJUnit4
@@ -19,6 +19,6 @@ class ExampleInstrumentedTest {
     fun useAppContext() {
         // Context of the app under test.
         val appContext = InstrumentationRegistry.getTargetContext()
-        assertEquals("pl.edu.pw.elka.wpam.hashtag", appContext.packageName)
+        assertEquals("wpam.hashtag", appContext.packageName)
     }
 }
