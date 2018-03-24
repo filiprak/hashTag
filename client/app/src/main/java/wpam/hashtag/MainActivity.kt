@@ -7,15 +7,20 @@ import android.support.design.widget.NavigationView
 import android.support.v4.view.GravityCompat
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.app.AppCompatActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
-class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+import com.android.volley.*
+import com.android.volley.toolbox.*
 
+class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
+    private var tag = "";
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        tag = GetMetaData(this, "log_tag") ?: ""
         setContentView(R.layout.activity_main)
         setSupportActionBar(toolbar)
 
@@ -81,5 +86,26 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
+    }
+
+    fun send_request() {
+        val cache = DiskBasedCache(cacheDir, 1024 * 1024) // 1MB cap
+        val network = BasicNetwork(HurlStack())
+
+        val requestQueue = RequestQueue(cache, network).apply {
+            start()
+        }
+
+        val url = GetMetaData(this, "server_url")
+        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url + "/demo", null,
+            Response.Listener { response ->
+                Log.v(tag, "Response: $response")
+            },
+            Response.ErrorListener { error ->
+                Log.e(tag, "Error: $error")
+            })
+
+        requestQueue.add(jsonObjectRequest)
+        Log.v(tag, "Sending done")
     }
 }

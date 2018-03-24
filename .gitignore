@@ -1,1 +1,3 @@
 *.swp
+.*
+client/app/src/main/instance/
