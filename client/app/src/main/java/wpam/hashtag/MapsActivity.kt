@@ -1,24 +1,31 @@
 package wpam.hashtag
 
 import android.Manifest
+import android.annotation.SuppressLint
+import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.design.widget.Snackbar
+import android.support.v7.app.AlertDialog
 import android.util.Log
-import android.view.View
+import android.view.LayoutInflater
+import android.widget.EditText
 import android.widget.Toast
 
+import com.google.android.gms.common.api.ResolvableApiException
+import com.google.android.gms.location.*
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
-import com.google.android.gms.location.FusedLocationProviderClient
-import com.google.android.gms.location.LocationServices
+import com.google.android.gms.maps.model.PolylineOptions
+import com.google.android.gms.tasks.Task
 
 import kotlinx.android.synthetic.main.activity_maps.*
 
@@ -26,8 +33,14 @@ import kotlinx.android.synthetic.main.activity_maps.*
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0
+    private val MY_PERMISSIONS_REQUEST_CHECK_SETTINGS = 1
+
     private lateinit var fusedLocationClient: FusedLocationProviderClient
+    private lateinit var locationCallback: LocationCallback
+
+    private var mCurrentLocation: Location? = null
     private lateinit var mMap: GoogleMap
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,7 +49,29 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        locationCallback = object : LocationCallback() {
+            override fun onLocationResult(locationResult: LocationResult?) {
+                locationResult ?: return
+                for (location in locationResult.locations){
+                    // Update UI with location data
+                    mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(location.latitude, location.longitude)))
+                    if (mCurrentLocation != null) {
+                        val popts = PolylineOptions().apply {
+                            color(Color.RED)
+                            width(20f)
+                            visible(true)
+                            add(LatLng(mCurrentLocation!!.latitude, mCurrentLocation!!.longitude))
+                            add(LatLng(location.latitude, location.longitude))
+                        }
+                        mCurrentLocation = location
+                        mMap.addPolyline(popts)
+                    }
+                    //Toast.makeText(this@MapsActivity, "New location:\n" + location, Toast.LENGTH_LONG).show();
+                }
+            }
+        }
 
     }
 
@@ -53,14 +88,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 // this thread waiting for the user's response! After the user
                 // sees the explanation, try again to request the permission.
                 Snackbar.make(map.view!!, "Location services permissions required",
-                        Snackbar.LENGTH_INDEFINITE).setAction("Grant", object: View.OnClickListener {
-                    override fun onClick(view: View) {
+                    Snackbar.LENGTH_INDEFINITE).setAction("Grant", { view ->
                         // Request the permission
                         ActivityCompat.requestPermissions(this@MapsActivity,
                                 arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
                                 MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION)
-                    }
-                }).show()
+                    }).show()
 
             } else {
                 // No explanation needed, we can request the permission.
@@ -88,7 +121,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     Log.w("PERMISSIONS", "permission ACCESS_FINE_LOCATION was not granted")
                     // permission denied, boo! Disable the
                     // functionality that depends on this permission.
-                    finish()
+                    Toast.makeText(this@MapsActivity, "Permission ACCESS_FINE_LOCATION was not granted",
+                            Toast.LENGTH_SHORT).show();
                 }
                 return
             }
@@ -111,28 +145,82 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
      */
+
+    @SuppressLint("RestrictedApi")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         requestLocationPermission()
-        // Add a marker in Sydney and move the camera
+
+        // get location test parameters
+        val dbuilder = AlertDialog.Builder(this)
+        dbuilder.setTitle("Location Tracking Settings")
+        val dview = LayoutInflater.from(this).inflate(R.layout.dialog_layout, null)
+        val intervValEditText = dview.findViewById<EditText>(R.id.intervVal)
+        val fintervValEditText = dview.findViewById<EditText>(R.id.fintervVal)
+
+        dbuilder.setView(dview)
+        dbuilder.setPositiveButton("OK") { dialog, p1 ->
+            val locationRequest = LocationRequest().apply {
+                interval = intervValEditText.text.toString().toLong()
+                fastestInterval = fintervValEditText.text.toString().toLong()
+                priority = LocationRequest.PRIORITY_HIGH_ACCURACY
+            }
+            initializeMyLocation(locationRequest)
+            Log.i("locationRequest", "locationRequest $locationRequest")
+        }
+        dbuilder.setNegativeButton("Cancel") { dialog, p1 ->
+            dialog.dismiss()
+        }
+        dbuilder.show()
+    }
+
+    private fun initializeMyLocation(locationRequest: LocationRequest) {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION)
-                == PackageManager.PERMISSION_GRANTED) {
-            // ACCESS_FINE_LOCATION is granted
-            mMap.isMyLocationEnabled = true
-            mMap.setOnMyLocationButtonClickListener({
-                Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-                // Return false so that we don't consume the event and the default behavior still occurs
-                // (the camera animates to the user's current position).
-                return@setOnMyLocationButtonClickListener false
-            })
-            mMap.setOnMyLocationClickListener({ location ->
-                Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
-            })
-            fusedLocationClient.lastLocation
+                != PackageManager.PERMISSION_GRANTED) return
+
+        // ACCESS_FINE_LOCATION is granted
+        mMap.isMyLocationEnabled = true
+        mMap.setOnMyLocationButtonClickListener({
+            Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show()
+            // Return false so that we don't consume the event and the default behavior still occurs
+            // (the camera animates to the user's current position).
+            return@setOnMyLocationButtonClickListener false
+        })
+        mMap.setOnMyLocationClickListener({ location ->
+            Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show()
+        })
+        fusedLocationClient.lastLocation
                 .addOnSuccessListener { location: Location? ->
-                    if (location != null)
+                    if (location != null) {
+                        mCurrentLocation = location
                         mMap.moveCamera(CameraUpdateFactory.newLatLng(LatLng(location.latitude, location.longitude)))
+                    }
                 }
+
+        val builder = LocationSettingsRequest.Builder()
+                .addLocationRequest(locationRequest)
+        val client: SettingsClient = LocationServices.getSettingsClient(this)
+        val task: Task<LocationSettingsResponse> = client.checkLocationSettings(builder.build())
+
+        task.addOnSuccessListener { locationSettingsResponse ->
+            // All location settings are satisfied. The client can initialize
+            // location requests here.
+            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, null)
+        }
+
+        task.addOnFailureListener { exception ->
+            if (exception is ResolvableApiException){
+                // Location settings are not satisfied, but this can be fixed
+                // by showing the user a dialog.
+                try {
+                    // Show the dialog by calling startResolutionForResult(),
+                    // and check the result in onActivityResult().
+                    exception.startResolutionForResult(this@MapsActivity,
+                            MY_PERMISSIONS_REQUEST_CHECK_SETTINGS)
+                } catch (sendEx: IntentSender.SendIntentException) {
+                    // Ignore the error.
+                }
+            }
         }
     }
 }
