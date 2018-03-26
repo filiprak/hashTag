@@ -4,6 +4,7 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.content.IntentSender
 import android.content.pm.PackageManager
+import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
@@ -24,6 +25,7 @@ import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.LatLng
+import com.google.android.gms.maps.model.MapStyleOptions
 import com.google.android.gms.maps.model.PolylineOptions
 import com.google.android.gms.tasks.Task
 
@@ -41,9 +43,12 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mCurrentLocation: Location? = null
     private lateinit var mMap: GoogleMap
 
+    private var tag = "";
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        tag = GetMetaData(this,"log_tag")?: tag
         setContentView(R.layout.activity_maps)
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         val mapFragment = supportFragmentManager
@@ -149,6 +154,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     @SuppressLint("RestrictedApi")
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
+        setMapStyle(mMap, R.raw.map_style_dblue)
         requestLocationPermission()
 
         // get location test parameters
@@ -221,6 +227,23 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     // Ignore the error.
                 }
             }
+        }
+    }
+
+    fun setMapStyle(googleMap: GoogleMap, style_id: Int) {
+        try {
+            // Customise the styling of the base map using a JSON object defined
+            // in a raw resource file.
+            val success = googleMap.setMapStyle(
+                    MapStyleOptions.loadRawResourceStyle(
+                            this, style_id))
+
+            if (!success) {
+                Log.e(tag, "Style parsing failed.")
+            }
+
+        } catch (e: Resources.NotFoundException) {
+            Log.e(tag, "Can't find style. Error: ", e);
         }
     }
 }
