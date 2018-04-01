@@ -18,6 +18,12 @@ android {
         release {
             minifyEnabled false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            resValue "string", "pubnub_api_publish_key", "pub-c-fc5f4013-b965-4956-a91a-f00c54e1f6d1"
+            resValue "string", "pubnub_api_subscribe_key", "sub-c-9dca3114-351a-11e8-9da7-9e748936d455"
+        }
+        debug {
+            resValue "string", "pubnub_api_publish_key", "pub-c-fc5f4013-b965-4956-a91a-f00c54e1f6d1"
+            resValue "string", "pubnub_api_subscribe_key", "sub-c-9dca3114-351a-11e8-9da7-9e748936d455"
         }
     }
 }
@@ -33,5 +39,5 @@ dependencies {
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.1'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
-    compile 'com.android.volley:volley:1.0.0'
+    compile group: 'com.pubnub', name: 'pubnub-gson', version: '4.19.0'
 }

@@ -13,9 +13,6 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.android.synthetic.main.app_bar_main.*
 
-import com.android.volley.*
-import com.android.volley.toolbox.*
-
 class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelectedListener {
     private var tag = "";
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,26 +83,5 @@ class MainActivity : AppCompatActivity(), NavigationView.OnNavigationItemSelecte
 
         drawer_layout.closeDrawer(GravityCompat.START)
         return true
-    }
-
-    fun send_request() {
-        val cache = DiskBasedCache(cacheDir, 1024 * 1024) // 1MB cap
-        val network = BasicNetwork(HurlStack())
-
-        val requestQueue = RequestQueue(cache, network).apply {
-            start()
-        }
-
-        val url = GetMetaData(this, "server_url")
-        val jsonObjectRequest = JsonObjectRequest(Request.Method.GET, url + "/demo", null,
-            Response.Listener { response ->
-                Log.v(tag, "Response: $response")
-            },
-            Response.ErrorListener { error ->
-                Log.e(tag, "Error: $error")
-            })
-
-        requestQueue.add(jsonObjectRequest)
-        Log.v(tag, "Sending done")
     }
 }
