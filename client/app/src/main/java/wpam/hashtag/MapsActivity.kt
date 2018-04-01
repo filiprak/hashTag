@@ -1,5 +1,7 @@
 package wpam.hashtag
 
+import java.util.Arrays
+
 import android.Manifest
 import android.annotation.SuppressLint
 import android.content.IntentSender
@@ -31,6 +33,13 @@ import com.google.android.gms.tasks.Task
 
 import kotlinx.android.synthetic.main.activity_maps.*
 
+import com.pubnub.api.*
+import com.pubnub.api.enums.*
+import com.pubnub.api.callbacks.*
+import com.pubnub.api.models.consumer.*
+import com.pubnub.api.models.consumer.pubsub.*
+
+import com.google.gson.*
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -45,6 +54,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private var tag = "";
 
+    private lateinit var pubnub: PubNub;
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -55,6 +65,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        setupConnection()
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -73,11 +84,65 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         mCurrentLocation = location
                         mMap.addPolyline(popts)
                     }
+                    shareLocation(location)
                     //Toast.makeText(this@MapsActivity, "New location:\n" + location, Toast.LENGTH_LONG).show();
                 }
             }
         }
 
+    }
+
+    private fun setupConnection() {
+        val config = PNConfiguration()
+        config.setSubscribeKey(GetMetaData(this, "com.pubnub.subscribe.API_KEY"))
+        config.setPublishKey(GetMetaData(this, "com.pubnub.publish.API_KEY"))
+        pubnub = PubNub(config)
+        pubnub.addListener(object: SubscribeCallback() {
+            override fun status(pubnub: PubNub, status: PNStatus) {
+                val category = status.getCategory()
+                Log.i(tag, "Status: $category")
+                when (category) {
+                    PNStatusCategory.PNUnexpectedDisconnectCategory -> {}
+                    PNStatusCategory.PNConnectedCategory -> {}
+                    PNStatusCategory.PNReconnectedCategory -> {}
+                    PNStatusCategory.PNReconnectionAttemptsExhausted -> {}
+                    PNStatusCategory.PNTimeoutCategory -> {}
+                    else -> {}
+                }
+            }
+            override fun message(pubnub: PubNub, message: PNMessageResult) {
+                Log.i(tag, "Message: $message")
+                when(message.channel) {
+                    "LocationSharing" -> {
+                        val received_location = Gson().fromJson(message.message, Location::class.java)
+                        Log.i(tag, "Received Location: $received_location")
+                        val publisher = message.publisher
+                    }
+                    else -> {
+                        Log.e(tag, "Wrong channel")
+                    }
+                }
+            }
+            override fun presence(pubnub: PubNub, presence: PNPresenceEventResult) {
+                Log.i(tag, "Presence: $presence")
+            }
+        })
+        pubnub.subscribe()
+            .channels(Arrays.asList("LocationSharing"))
+            .execute()
+        Log.i(tag, "Connection success")
+    }
+
+    private fun shareLocation(location : Location) {
+        Log.i(tag, "Location share cb")
+        pubnub.publish()
+            .message(location)
+            .channel("LocationSharing")
+            .async(object: PNCallback<PNPublishResult>() {
+                override fun onResponse(result: PNPublishResult, status: PNStatus) {
+                    Log.i(tag, "Result of location sharing: $result, status: $status")
+                }
+            })
     }
 
     private fun requestLocationPermission() {
