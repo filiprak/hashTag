@@ -81,7 +81,7 @@ class PubNubService : IntentService {
         val notification = Notification.Builder(this)
             .setContentTitle(getText(R.string.notification_title))
             .setContentText(getText(R.string.notification_message))
-            .setSmallIcon(R.drawable.hash)
+            .setSmallIcon(R.drawable.push_logo)
             .setContentIntent(pendingIntent)
             .setTicker(getText(R.string.notification_ticker_text))
             .build();
