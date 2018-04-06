@@ -2,13 +2,13 @@ package wpam.hashtag
 
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.IntentSender
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
+import android.os.*
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.design.widget.Snackbar
@@ -31,6 +31,8 @@ import com.google.android.gms.tasks.Task
 
 import kotlinx.android.synthetic.main.activity_maps.*
 
+import wpam.hashtag.services.pubnub.PubNubService
+
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0
@@ -42,7 +44,33 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mCurrentLocation: Location? = null
     private lateinit var mMap: GoogleMap
 
-    private var tag = "";
+    private var tag = ""
+
+    private var pubNubServiceBinder: PubNubService? = null
+
+    public val pubNubConnection = object: ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, binder: IBinder) {
+            pubNubServiceBinder = (binder as PubNubService.PubNubBinder).getService();
+            Log.d(tag,"connected");
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            pubNubServiceBinder = null
+            Log.d(tag,"disconnected");
+        }
+    };
+
+    public val pubNubHandler = object: Handler() {
+        override fun handleMessage(message: Message) {
+            val messageData = message.getData();
+        }
+    };
+
+    public fun doBindService() {
+        val intent = Intent(this, PubNubService::class.java);
+        intent.putExtra("messenger", Messenger(pubNubHandler))
+        bindService(intent, pubNubConnection, Context.BIND_AUTO_CREATE);
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -53,6 +81,8 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        val intent = Intent(this, PubNubService::class.java)
+        startService(intent)
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
