@@ -1,16 +1,14 @@
 package wpam.hashtag
 
-import java.util.Arrays
-
 import android.Manifest
 import android.annotation.SuppressLint
-import android.content.IntentSender
+import android.content.*
 import android.content.pm.PackageManager
 import android.content.res.Resources
 import android.graphics.Color
 import android.location.Location
 import android.support.v7.app.AppCompatActivity
-import android.os.Bundle
+import android.os.*
 import android.support.v4.app.ActivityCompat
 import android.support.v4.content.ContextCompat
 import android.support.design.widget.Snackbar
@@ -33,13 +31,7 @@ import com.google.android.gms.tasks.Task
 
 import kotlinx.android.synthetic.main.activity_maps.*
 
-import com.pubnub.api.*
-import com.pubnub.api.enums.*
-import com.pubnub.api.callbacks.*
-import com.pubnub.api.models.consumer.*
-import com.pubnub.api.models.consumer.pubsub.*
-
-import com.google.gson.*
+import wpam.hashtag.services.pubnub.PubNubService
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
@@ -52,9 +44,34 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     private var mCurrentLocation: Location? = null
     private lateinit var mMap: GoogleMap
 
-    private var tag = "";
+    private var tag = ""
 
-    private lateinit var pubnub: PubNub;
+    private var pubNubServiceBinder: PubNubService? = null
+
+    public val pubNubConnection = object: ServiceConnection {
+        override fun onServiceConnected(className: ComponentName, binder: IBinder) {
+            pubNubServiceBinder = (binder as PubNubService.PubNubBinder).getService();
+            Log.d(tag,"connected");
+        }
+
+        override fun onServiceDisconnected(className: ComponentName) {
+            pubNubServiceBinder = null
+            Log.d(tag,"disconnected");
+        }
+    }
+
+    public val pubNubHandler = object: Handler() {
+        override fun handleMessage(message: Message) {
+            Log.i(tag, "MapsActivity got message: $message")
+        }
+    }
+
+    public fun doBindService() {
+        Log.i(tag, "doBindService")
+        val intent = Intent(this, PubNubService::class.java);
+        intent.putExtra("messenger", Messenger(pubNubHandler))
+        bindService(intent, pubNubConnection, Context.BIND_AUTO_CREATE);
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -65,7 +82,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        setupConnection()
+        doBindService()
+        shareLocation()
+        Log.d(tag, "service set")
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -84,65 +104,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         mCurrentLocation = location
                         mMap.addPolyline(popts)
                     }
-                    shareLocation(location)
                     //Toast.makeText(this@MapsActivity, "New location:\n" + location, Toast.LENGTH_LONG).show();
                 }
             }
         }
-
     }
 
-    private fun setupConnection() {
-        val config = PNConfiguration()
-        config.setSubscribeKey(GetMetaData(this, "com.pubnub.subscribe.API_KEY"))
-        config.setPublishKey(GetMetaData(this, "com.pubnub.publish.API_KEY"))
-        pubnub = PubNub(config)
-        pubnub.addListener(object: SubscribeCallback() {
-            override fun status(pubnub: PubNub, status: PNStatus) {
-                val category = status.getCategory()
-                Log.i(tag, "Status: $category")
-                when (category) {
-                    PNStatusCategory.PNUnexpectedDisconnectCategory -> {}
-                    PNStatusCategory.PNConnectedCategory -> {}
-                    PNStatusCategory.PNReconnectedCategory -> {}
-                    PNStatusCategory.PNReconnectionAttemptsExhausted -> {}
-                    PNStatusCategory.PNTimeoutCategory -> {}
-                    else -> {}
-                }
-            }
-            override fun message(pubnub: PubNub, message: PNMessageResult) {
-                Log.i(tag, "Message: $message")
-                when(message.channel) {
-                    "LocationSharing" -> {
-                        val received_location = Gson().fromJson(message.message, Location::class.java)
-                        Log.i(tag, "Received Location: $received_location")
-                        val publisher = message.publisher
-                    }
-                    else -> {
-                        Log.e(tag, "Wrong channel")
-                    }
-                }
-            }
-            override fun presence(pubnub: PubNub, presence: PNPresenceEventResult) {
-                Log.i(tag, "Presence: $presence")
-            }
-        })
-        pubnub.subscribe()
-            .channels(Arrays.asList("LocationSharing"))
-            .execute()
-        Log.i(tag, "Connection success")
-    }
-
-    private fun shareLocation(location : Location) {
-        Log.i(tag, "Location share cb")
-        pubnub.publish()
-            .message(location)
-            .channel("LocationSharing")
-            .async(object: PNCallback<PNPublishResult>() {
-                override fun onResponse(result: PNPublishResult, status: PNStatus) {
-                    Log.i(tag, "Result of location sharing: $result, status: $status")
-                }
-            })
+    private fun shareLocation() {
+        val shareLocationIntent = Intent(this, PubNubService::class.java)
+        shareLocationIntent.putExtra("request", "share_location")
+        startService(shareLocationIntent)
     }
 
     private fun requestLocationPermission() {

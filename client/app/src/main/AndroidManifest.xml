@@ -24,6 +24,8 @@
             android:name=".MapsActivity"
             android:label="@string/title_activity_maps">
         </activity>
+        <service android:name="wpam.hashtag.services.pubnub.PubNubService"/>
+        <service android:name="wpam.hashtag.services.location.LocationService"/>
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="@string/google_maps_key" />
