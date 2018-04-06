@@ -8,6 +8,9 @@
     <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
 
+    <string name="pubnub_publish_api_key">pub-c-fc5f4013-b965-4956-a91a-f00c54e1f6d1"</string>
+    <string name="pubnub_subscribe_api_key">sub-c-9dca3114-351a-11e8-9da7-9e748936d455</string>
+
     <string name="notification_title">Dupa</string>
     <string name="notification_message">Penis</string>
     <string name="notification_channel_id">wpam.hashtag.channel_id</string>

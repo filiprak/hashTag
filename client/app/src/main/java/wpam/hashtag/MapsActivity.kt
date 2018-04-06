@@ -58,15 +58,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
             pubNubServiceBinder = null
             Log.d(tag,"disconnected");
         }
-    };
+    }
 
     public val pubNubHandler = object: Handler() {
         override fun handleMessage(message: Message) {
-            val messageData = message.getData();
+            Log.i(tag, "MapsActivity got message: $message")
         }
-    };
+    }
 
     public fun doBindService() {
+        Log.i(tag, "doBindService")
         val intent = Intent(this, PubNubService::class.java);
         intent.putExtra("messenger", Messenger(pubNubHandler))
         bindService(intent, pubNubConnection, Context.BIND_AUTO_CREATE);
@@ -81,8 +82,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 .findFragmentById(R.id.map) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
-        val intent = Intent(this, PubNubService::class.java)
-        startService(intent)
+        doBindService()
+        shareLocation()
+        Log.d(tag, "service set")
+
         fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
@@ -101,14 +104,16 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                         mCurrentLocation = location
                         mMap.addPolyline(popts)
                     }
-                    shareLocation(location)
                     //Toast.makeText(this@MapsActivity, "New location:\n" + location, Toast.LENGTH_LONG).show();
                 }
             }
         }
     }
 
-    private fun shareLocation(location: Location) {
+    private fun shareLocation() {
+        val shareLocationIntent = Intent(this, PubNubService::class.java)
+        shareLocationIntent.putExtra("request", "share_location")
+        startService(shareLocationIntent)
     }
 
     private fun requestLocationPermission() {
