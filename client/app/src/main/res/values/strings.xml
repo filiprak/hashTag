@@ -1,11 +1,9 @@
 <resources>
     <string name="app_name">hashTag</string>
+    <string name="app_name_short">Tag</string>
+
     <string name="log_tag">hashtag</string>
 
-    <string name="navigation_drawer_open">Open navigation drawer</string>
-    <string name="navigation_drawer_close">Close navigation drawer</string>
-
-    <string name="action_settings">Settings</string>
     <string name="title_activity_maps">Map</string>
 
     <string name="pubnub_publish_api_key">pub-c-fc5f4013-b965-4956-a91a-f00c54e1f6d1"</string>
