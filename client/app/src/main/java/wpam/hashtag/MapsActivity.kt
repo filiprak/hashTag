@@ -15,6 +15,7 @@ import android.support.design.widget.Snackbar
 import android.support.v7.app.AlertDialog
 import android.util.Log
 import android.view.LayoutInflater
+import android.view.KeyEvent
 import android.widget.EditText
 import android.widget.Toast
 
@@ -68,9 +69,10 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     public fun doBindService() {
         Log.i(tag, "doBindService")
-        val intent = Intent(this, PubNubService::class.java);
+        val intent = Intent(this, PubNubService::class.java)
         intent.putExtra("messenger", Messenger(pubNubHandler))
-        bindService(intent, pubNubConnection, Context.BIND_AUTO_CREATE);
+        bindService(intent, pubNubConnection, Context.BIND_AUTO_CREATE)
+        startService(intent)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -108,6 +110,19 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+    }
+
+    override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+        if (Integer.parseInt(android.os.Build.VERSION.SDK) > 5
+            && keyCode == KeyEvent.KEYCODE_BACK
+            && event.getRepeatCount() == 0) {
+                Log.d(tag, "onKeyDown Called")
+                val stopIntent = Intent(this, PubNubService::class.java)
+                stopIntent.putExtra("request", "stop")
+                startService(stopIntent)
+                unbindService(pubNubConnection)
+        }
+        return super.onKeyDown(keyCode, event)
     }
 
     private fun shareLocation() {

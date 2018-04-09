@@ -98,6 +98,9 @@ class PubNubService : IntentService {
                 location_intent.putExtra("messenger", Messenger(locationHandler))
                 bindService(location_intent, locationConnection, Context.BIND_AUTO_CREATE)
             }
+            "stop" -> {
+                unbindService(locationConnection)
+            }
             else -> {
                 Log.d(tag, "Unknown request")
             }
@@ -109,6 +112,11 @@ class PubNubService : IntentService {
         messenger = intent.getExtras()?.get("messenger") as Messenger
         listener?.messenger = messenger
         return binder
+    }
+
+    override fun onDestroy() {
+        Log.i(tag, "PubNubService: onDestroy")
+        pubnub.unsubscribeAll()
     }
 
     public class PubNubBinder(private val service: PubNubService): Binder() {
