@@ -88,7 +88,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         shareLocation()
         Log.d(tag, "service set")
 
-        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
+        /*fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
         locationCallback = object : LocationCallback() {
             override fun onLocationResult(locationResult: LocationResult?) {
                 locationResult ?: return
@@ -109,7 +109,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                     //Toast.makeText(this@MapsActivity, "New location:\n" + location, Toast.LENGTH_LONG).show();
                 }
             }
-        }
+        }*/
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
@@ -206,7 +206,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         setMapStyle(mMap, R.raw.map_style_dblue)
-        requestLocationPermission()
+        /*requestLocationPermission()
 
         // get location test parameters
         val dbuilder = AlertDialog.Builder(this)
@@ -228,7 +228,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         dbuilder.setNegativeButton("Cancel") { dialog, p1 ->
             dialog.dismiss()
         }
-        dbuilder.show()
+        dbuilder.show()*/
     }
 
     private fun initializeMyLocation(locationRequest: LocationRequest) {
