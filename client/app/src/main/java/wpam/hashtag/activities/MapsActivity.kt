@@ -15,6 +15,7 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
 
 import wpam.hashtag.GetMetaData
+import wpam.hashtag.HashTagLocation
 import wpam.hashtag.R
 
 import wpam.hashtag.services.pubnub.PubNubService

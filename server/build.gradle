@@ -30,6 +30,7 @@ dependencies {
     implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.19.0'
     testCompile 'junit:junit:4.11'
     testCompile "org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version"
+    compile project(':common')
 }
 
 task wrapper(type: Wrapper) {

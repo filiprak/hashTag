@@ -41,4 +41,5 @@ dependencies {
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.1'
     implementation group: 'com.pubnub', name: 'pubnub-gson', version: '4.19.0'
     compile 'com.google.code.gson:gson:2.8.2'
+    compile project(':common')
 }
