@@ -2,9 +2,6 @@ package wpam.hashtag.services.pubnub
 
 import android.os.*
 import android.util.*
-import android.location.*
-
-import com.google.gson.*
 
 import com.pubnub.api.*
 import com.pubnub.api.enums.*
@@ -31,10 +28,10 @@ class PubNubListener(val tag: String) : SubscribeCallback() {
         Log.i(tag, "Message: $message")
         when(message.channel) {
             "LocationSharing" -> {
-                val received_location = Gson().fromJson(message.message, Location::class.java)
+                /*val received_location = Gson().fromJson(message.message, Location::class.java)
                 Log.i(tag, "Received Location: $received_location")
-                val publisher = message.publisher
-                messenger?.send(Message.obtain(null, 1, received_location))
+                val publisher = message.publisher*/
+                messenger?.send(Message.obtain(null, 1, message.message))
             }
             else -> {
                 Log.e(tag, "Wrong channel")

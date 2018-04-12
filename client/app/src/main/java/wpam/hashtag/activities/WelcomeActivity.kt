@@ -1,12 +1,12 @@
-package wpam.hashtag
+package wpam.hashtag.activities
 
 import android.content.Intent
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import android.util.Log
 import android.view.View
 import kotlinx.android.synthetic.main.activity_welcome.*
-
+import wpam.hashtag.GetMetaData
+import wpam.hashtag.R
 
 
 class WelcomeActivity : AppCompatActivity() {
