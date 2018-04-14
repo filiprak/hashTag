@@ -5,7 +5,11 @@
     <color name="colorPrimaryDark">#d65325</color>
     <color name="colorSecondary">#cccccc</color>
     <color name="colorSecondaryDark">#a4a4a4</color>
+
+
+    <color name="colorAccentDark">#e7cf00</color>
     <color name="colorAccent">#ffe400</color>
+    <color name="colorAccentOpaque">#7fffe400</color>
 
     <color name="colorText">#ffffff</color>
     <color name="colorTextDisabled">#7fffffff</color>

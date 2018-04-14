@@ -2,20 +2,17 @@ package wpam.hashtag.activities
 
 import android.content.*
 import android.content.res.Resources
-import android.location.Location
 import android.support.v7.app.AppCompatActivity
 import android.os.*
 import android.util.Log
 import android.view.KeyEvent
 
-import com.google.android.gms.location.*
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.model.MapStyleOptions
 
 import wpam.hashtag.GetMetaData
-import wpam.hashtag.HashTagLocation
 import wpam.hashtag.R
 
 import wpam.hashtag.services.pubnub.PubNubService
@@ -23,20 +20,11 @@ import wpam.hashtag.services.pubnub.PubNubService
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
-    private val MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 0
-    private val MY_PERMISSIONS_REQUEST_CHECK_SETTINGS = 1
-
-    private lateinit var fusedLocationClient: FusedLocationProviderClient
-    private lateinit var locationCallback: LocationCallback
-
-    private var mCurrentLocation: Location? = null
     private lateinit var mMap: GoogleMap
-
     private var tag = ""
-
     private var pubNubServiceBinder: PubNubService? = null
 
-    public val pubNubConnection = object: ServiceConnection {
+    val pubNubConnection = object: ServiceConnection {
         override fun onServiceConnected(className: ComponentName, binder: IBinder) {
             pubNubServiceBinder = (binder as PubNubService.PubNubBinder).getService();
             Log.d(tag,"connected");
@@ -48,14 +36,14 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    public val pubNubHandler = object: Handler() {
+    val pubNubHandler = object: Handler() {
         override fun handleMessage(message: Message) {
             Log.i(tag, "MapsActivity got message: $message")
         }
     }
 
 
-    public fun doBindService() {
+    fun doBindService() {
         Log.i(tag, "doBindService")
         val intent = Intent(this, PubNubService::class.java)
         intent.putExtra("messenger", Messenger(pubNubHandler))

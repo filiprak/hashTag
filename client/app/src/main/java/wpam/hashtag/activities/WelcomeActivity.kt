@@ -29,7 +29,7 @@ class WelcomeActivity : AppCompatActivity() {
     }
 
     private fun startBtnHandler(view: View) {
-        startActivity(Intent(this, MapsActivity::class.java))
+        startActivity(Intent(this, LobbyActivity::class.java))
     }
 
     private fun quitBtnHandler(view: View) {
