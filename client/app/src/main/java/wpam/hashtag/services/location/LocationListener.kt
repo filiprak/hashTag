@@ -5,6 +5,9 @@ import android.content.*
 import android.util.*
 import android.app.*
 import android.os.*
+import wpam.hashtag.HashTagApplication
+import wpam.hashtag.HashTagLocation
+import wpam.hashtag.LocationToHashTagLocation
 
 class LocationShareListener: LocationListener {
     var lastLocation: Location? = null
@@ -19,9 +22,10 @@ class LocationShareListener: LocationListener {
         this.lastLocation = Location(provider)
     }
 
-    override fun onLocationChanged(location: Location) {
-        Log.i(tag, "Location changed to: $location")
-        messenger?.send(Message.obtain(null, MessageType.LOCATION_CHANGED.ordinal, location))
+    override fun onLocationChanged(loc: Location) {
+        Log.i(tag, "Location changed to: $loc")
+        val htLocation = LocationToHashTagLocation(loc, HashTagApplication.UID)
+        messenger?.send(Message.obtain(null, MessageType.LOCATION_CHANGED.ordinal, htLocation))
         if (messenger == null) {
             Log.e(tag, "no messenger")
         }

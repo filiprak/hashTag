@@ -1,23 +1,70 @@
 package wpam.hashtag
 
-import android.location.Location
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+
 
 class HashTagLocation {
-    private lateinit var uid : String
+    var uid : String? = null
 
-    private val lng : Double = 0.0
-    private val lat : Double = 0.0
+    var lng : Double = 0.0
+    var lat : Double = 0.0
 
-    private val accuracy : Float = 0.0f
+    var accuracy : Float? = null
+    var bearing : Float? = null
+    var speed : Float? = null
 
-    private val bearing : Float = 0.0f
-    private val speed : Double = 0.0
 
-    constructor(json: String) {
+    var hasAccuracy : Boolean = false
+    var hasBearing : Boolean = false
+    var hasSpeed : Boolean = false
+    var hasUid : Boolean = false
 
+
+    constructor(lat: Double, lng: Double, accuracy: Float, bearing: Float, speed: Float) {
+        this.lat = lat
+        this.lng = lng
+        this.accuracy = accuracy
+        this.bearing = bearing
+        this.speed = speed
     }
 
-    constructor(location: Location)
+    constructor(jsonStr: String) {
+        val parsed = Gson().fromJson(jsonStr, HashTagLocation::class.java)
+        if (parsed != null) {
+            uid = parsed.uid
+            lng = parsed.lng
+            lat = parsed.lat
+            accuracy = parsed.accuracy
+            bearing = parsed.bearing
+            speed = parsed.speed
+
+            hasUid = parsed.uid != null
+            hasAccuracy = parsed.hasBearing
+            hasBearing = parsed.hasBearing
+
+        }
+    }
+
+    constructor(parsed: JsonObject?) {
+        if (parsed != null) {
+            uid = parsed.get("uid")?.asString
+            lng = parsed.get("lng").asDouble
+            lat = parsed.get("lat").asDouble
+            accuracy = parsed.get("accuracy")?.asFloat
+            bearing = parsed.get("bearing")?.asFloat
+            speed = parsed.get("speed")?.asFloat
+
+            hasUid = parsed.get("hasUid").asBoolean
+            hasAccuracy = parsed.get("hasAccuracy").asBoolean
+            hasBearing = parsed.get("hasBearing").asBoolean
+            hasSpeed = parsed.get("hasSpeed").asBoolean
+        }
+    }
+
+    fun jsonify(): String {
+        return Gson().toJson(this)
+    }
 
     override fun toString(): String {
         //@todo

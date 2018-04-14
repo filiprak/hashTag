@@ -7,9 +7,11 @@ import android.provider.Settings
 import android.support.v7.app.AppCompatActivity
 import android.view.LayoutInflater
 import android.view.View
+import android.widget.Button
 import android.widget.EditText
 import kotlinx.android.synthetic.main.activity_welcome.*
 import wpam.hashtag.GetMetaData
+import wpam.hashtag.HashTagApplication
 import wpam.hashtag.R
 
 
@@ -44,17 +46,22 @@ class WelcomeActivity : AppCompatActivity() {
         TODO("not implemented")
     }
 
+    /** Developer settings dialog
+     */
     private fun devBtnHandler(view: View) {
         val dbuilder = AlertDialog.Builder(this)
         dbuilder.setTitle("Developer settings")
         val dview = LayoutInflater.from(this).inflate(R.layout.dialog_layout, null)
         val intervValEditText = dview.findViewById<EditText>(R.id.intervVal)
         val fintervValEditText = dview.findViewById<EditText>(R.id.fintervVal)
+        val mapsbtn = dview.findViewById<Button>(R.id.openMapsBtn)
+        mapsbtn.setOnClickListener { view ->
+            startActivity(Intent(this, MapsActivity::class.java))
+        }
 
         val androidIdView = dview.findViewById<EditText>(R.id.androidIdPlainText)
 
-        androidIdView.setText(Settings.Secure.getString(this.contentResolver,
-                Settings.Secure.ANDROID_ID))
+        androidIdView.setText(HashTagApplication.UID)
 
         dbuilder.setView(dview)
         dbuilder.setPositiveButton("Save") { dialog, p1 ->

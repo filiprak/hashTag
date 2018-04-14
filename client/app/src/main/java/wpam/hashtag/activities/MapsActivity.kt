@@ -2,6 +2,7 @@ package wpam.hashtag.activities
 
 import android.content.*
 import android.content.res.Resources
+import android.graphics.Color
 import android.support.v7.app.AppCompatActivity
 import android.os.*
 import android.util.Log
@@ -10,17 +11,26 @@ import android.view.KeyEvent
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
 import com.google.android.gms.maps.SupportMapFragment
-import com.google.android.gms.maps.model.MapStyleOptions
+import com.google.android.gms.maps.model.*
 
 import wpam.hashtag.GetMetaData
+import wpam.hashtag.HashTagLocation
 import wpam.hashtag.R
 
 import wpam.hashtag.services.pubnub.PubNubService
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.MarkerOptions
+import com.google.gson.JsonObject
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var mMap: GoogleMap
+
+    /** List of positions of all connected users */
+    private var positionMarkers: HashMap<String, Marker> = HashMap()
+
+
     private var tag = ""
     private var pubNubServiceBinder: PubNubService? = null
 
@@ -38,7 +48,24 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
 
     val pubNubHandler = object: Handler() {
         override fun handleMessage(message: Message) {
-            Log.i(tag, "MapsActivity got message: $message")
+            Log.i(tag, "Got HashTagLocation: ${message.obj}")
+
+            val htLocation = HashTagLocation(message.obj as JsonObject)
+
+            if (htLocation.uid != null) {
+                if (!positionMarkers.keys.contains(htLocation.uid!!)) {
+                    var positionMarker = mMap.addMarker(MarkerOptions()
+                            .position(LatLng(htLocation.lat, htLocation.lng))
+                            .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_arrow32))
+                            .anchor(0.5f, 0.5f)
+                            .flat(true))
+                    positionMarkers.put(htLocation.uid!!, positionMarker)
+                    /*if (htLocation.bearing != null)
+                        positionMark!!.rotation = htLocation.bearing*/
+                } else {
+                    positionMarkers.get(htLocation.uid!!)?.position = LatLng(htLocation.lat, htLocation.lng)
+                }
+            }
         }
     }
 

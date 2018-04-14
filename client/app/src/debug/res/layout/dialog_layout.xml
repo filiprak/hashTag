@@ -132,7 +132,41 @@
                     android:layout_weight="1"
                     android:ems="10"
                     android:text="value" />
+
             </LinearLayout>
+
+            <TextView
+                android:id="@+id/textView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_weight="1"
+                android:text="Actions"
+                android:textSize="18sp" />
+
+            <Button
+                android:id="@+id/openMapsBtn"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="open Map Activity" />
+
+            <Button
+                android:id="@+id/actionBtn1"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Action1" />
+
+            <Button
+                android:id="@+id/actionBtn2"
+                style="@style/Widget.AppCompat.Button"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="Action2" />
 
         </LinearLayout>
     </ScrollView>
