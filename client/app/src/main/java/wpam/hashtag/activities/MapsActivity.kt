@@ -7,6 +7,7 @@ import android.support.v7.app.AppCompatActivity
 import android.os.*
 import android.util.Log
 import android.view.KeyEvent
+import android.widget.Toast
 
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback
@@ -59,11 +60,17 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
                             .icon(BitmapDescriptorFactory.fromResource(R.drawable.map_marker_arrow32))
                             .anchor(0.5f, 0.5f)
                             .flat(true))
+                    if (htLocation.hasBearing) positionMarker.rotation = htLocation.bearing!!
                     positionMarkers.put(htLocation.uid!!, positionMarker)
                     /*if (htLocation.bearing != null)
                         positionMark!!.rotation = htLocation.bearing*/
+                    Toast.makeText(this@MapsActivity, "New user location: uid: ${htLocation.uid}", Toast.LENGTH_SHORT).show();
                 } else {
-                    positionMarkers.get(htLocation.uid!!)?.position = LatLng(htLocation.lat, htLocation.lng)
+                    var posMarker = positionMarkers.get(htLocation.uid!!)
+                    posMarker?.position = LatLng(htLocation.lat, htLocation.lng)
+                    if (htLocation.hasBearing) posMarker?.rotation = htLocation.bearing!!
+                    Toast.makeText(this@MapsActivity, "uid: ${htLocation.uid} bearing(${htLocation.hasBearing}):" +
+                            "${htLocation.bearing}, speed(${htLocation.hasSpeed}): ${htLocation.speed}", Toast.LENGTH_SHORT).show();
                 }
             }
         }
