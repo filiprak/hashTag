@@ -1,0 +1,20 @@
+[
+  {
+    "featureType": "all",
+    "elementType": "all",
+    "stylers": [
+      {
+        "visibility": "on"
+      },
+      {
+        "saturation": "-4"
+      },
+      {
+        "lightness": "4"
+      },
+      {
+        "weight": "1.29"
+      }
+    ]
+  }
+]
