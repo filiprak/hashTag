@@ -18,6 +18,9 @@ class HashTagApplication : Application() {
 
         private var instance: HashTagApplication? = null
 
+        /* Application config object */
+        val config: HashTagConfig = HashTagConfig()
+
         fun applicationContext() : Context {
             return instance!!.applicationContext
         }

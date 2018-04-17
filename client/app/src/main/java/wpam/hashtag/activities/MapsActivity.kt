@@ -22,6 +22,7 @@ import wpam.hashtag.services.pubnub.PubNubService
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.MarkerOptions
 import com.google.gson.JsonObject
+import wpam.hashtag.HashTagApplication
 
 
 class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
@@ -128,7 +129,7 @@ class MapsActivity : AppCompatActivity(), OnMapReadyCallback {
      */
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
-        setMapStyle(mMap, R.raw.map_style_dblue)
+        setMapStyle(mMap, HashTagApplication.config.activeMapThemeId)
     }
 
     fun setMapStyle(googleMap: GoogleMap, style_id: Int) {

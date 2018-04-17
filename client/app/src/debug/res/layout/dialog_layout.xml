@@ -51,7 +51,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="interval" />
+                    android:text="interval (ms)" />
 
                 <EditText
                     android:id="@+id/intervVal"
@@ -59,8 +59,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ems="10"
-                    android:inputType="number"
-                    android:text="2000" />
+                    android:inputType="number|numberDecimal" />
             </LinearLayout>
 
             <LinearLayout
@@ -73,16 +72,15 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:text="fast interval" />
+                    android:text="min distance (m)" />
 
                 <EditText
-                    android:id="@+id/fintervVal"
+                    android:id="@+id/distanceVal"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:ems="10"
-                    android:inputType="number"
-                    android:text="500" />
+                    android:inputType="number|numberDecimal" />
             </LinearLayout>
 
             <TextView
@@ -167,6 +165,20 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Action2" />
+
+            <TextView
+                android:id="@+id/textView3"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="15dp"
+                android:layout_weight="1"
+                android:text="Map theme"
+                android:textSize="18sp" />
+
+            <RadioGroup
+                android:id="@+id/mapStylesGroup"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent" />
 
         </LinearLayout>
     </ScrollView>

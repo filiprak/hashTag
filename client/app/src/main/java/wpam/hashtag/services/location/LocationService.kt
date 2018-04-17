@@ -5,8 +5,7 @@ import android.app.*
 import android.util.*
 import android.content.*
 import android.location.*
-
-import wpam.hashtag.services.pubnub.*
+import wpam.hashtag.HashTagApplication
 
 import wpam.hashtag.R
 
@@ -19,8 +18,8 @@ class LocationService: IntentService {
     private val binder = LocationBinder(this)
 
     companion object {
-        private val locationInterval : Long = 1000;
-        private val locationDistance = 10f;
+        private var locationInterval : Long = HashTagApplication.config.locationUpdateInterval
+        private var locationDistance = HashTagApplication.config.locationUpdateDistance
     }
 
     constructor() : super("LocationService") {

@@ -1,12 +1,9 @@
 package wpam.hashtag.services.location
 
 import android.location.*
-import android.content.*
 import android.util.*
-import android.app.*
 import android.os.*
 import wpam.hashtag.HashTagApplication
-import wpam.hashtag.HashTagLocation
 import wpam.hashtag.LocationToHashTagLocation
 
 class LocationShareListener: LocationListener {
